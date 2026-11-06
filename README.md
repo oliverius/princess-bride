@@ -31,11 +31,11 @@ In VS Code, run **Terminal: Run Build Task** to build, or open **Tasks: Run Task
 
 1. Add the passage to `src/story.twee` using Twee syntax (`:: PassageName`).
 2. Link to it from the relevant choice or continuation with SugarCube's `<<link>>` macro.
-3. If the passage needs an illustration, tag it with the matching `art-##` tag (for example, `:: PassageName [art-03]`), then add the image path and descriptive alt text under that tag in `setup.sceneImages` in the `StoryScript` passage. Add `<<sceneImage>>` where the image should appear. Passages without a matching illustration can omit the art tag.
+3. If the passage needs an illustration, tag it with the matching `art-##` tag (for example, `:: PassageName [art-03]`), then add the image path and descriptive alt text under that tag in `setup.sceneImages` in the `StoryScript` passage. The persistent illustration above `#passages` resolves the tag automatically; do not add image markup to individual passages. Passages without a matching illustration can omit the art tag.
 4. Put new source images in `assets/images/`; the build copies that folder into `dist/assets/images/`.
 5. Run `npm run build` and review the game with `npm run preview`.
 
-The shared image widget keeps illustration layout consistent; passages with the same art tag can share an image without repeating its path or alt text.
+The `StoryInterface` keeps the illustration outside the passage-replaced DOM. Passages with the same art tag retain the same image element and resolved image URL during navigation.
 
 ## Current scope
 

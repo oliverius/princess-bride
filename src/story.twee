@@ -24,6 +24,10 @@ body {
 	padding: 0;
 }
 
+html {
+	scrollbar-gutter: stable;
+}
+
 #ui-bar,
 #ui-bar-toggle {
 	display: none !important;
@@ -166,6 +170,12 @@ a:focus-visible {
 	}
 }
 
+:: StoryInterface
+<figure id="persistent-illustration" class="scene-illustration" hidden>
+	<img id="persistent-illustration-image" alt="">
+</figure>
+<div id="passages"></div>
+
 :: StoryScript [script]
 setup.sceneImages = Object.freeze({
 	"art-01": {
@@ -242,19 +252,76 @@ setup.sceneImages = Object.freeze({
 	}
 });
 
-:: SceneImageWidget [widget]
-<<widget "sceneImage">>
-	<<set _artTag = tags()[0]>>
-	<<set _sceneArt = setup.sceneImages[_artTag]>>
-	<<if _sceneArt>>
-		<figure class="scene-illustration">
-			<img @src="_sceneArt.src" @alt="_sceneArt.alt">
-		</figure>
-	<</if>>
-<</widget>>
+(function () {
+	let navigationId = 0;
+	let pendingImage = null;
+
+	function updateIllustration(event) {
+		const passage = event.passage;
+		const artTag = passage.tags.find(function (tag) {
+			return tag.indexOf("art-") === 0;
+		});
+		const sceneArt = artTag && setup.sceneImages[artTag];
+		const figure = document.getElementById("persistent-illustration");
+		const image = document.getElementById("persistent-illustration-image");
+		const targetUrl = sceneArt ? new URL(sceneArt.src, document.baseURI).href : null;
+
+		if (!targetUrl) {
+			navigationId += 1;
+			pendingImage = null;
+			figure.hidden = true;
+			image.removeAttribute("data-image-url");
+			return;
+		}
+
+		if (image.getAttribute("data-image-url") === targetUrl) {
+			navigationId += 1;
+			pendingImage = null;
+			return;
+		}
+
+		if (pendingImage && pendingImage.url === targetUrl) {
+			pendingImage.navigationId = ++navigationId;
+			return;
+		}
+
+		const request = {
+			url: targetUrl,
+			navigationId: ++navigationId
+		};
+		const preload = new Image();
+		pendingImage = request;
+
+		preload.onload = function () {
+			if (pendingImage !== request || request.navigationId !== navigationId) {
+				return;
+			}
+
+			image.src = targetUrl;
+			image.alt = sceneArt.alt;
+			image.setAttribute("data-image-url", targetUrl);
+			figure.hidden = false;
+			pendingImage = null;
+		};
+
+		preload.onerror = function () {
+			if (pendingImage !== request || request.navigationId !== navigationId) {
+				return;
+			}
+
+			console.error("Could not load scene illustration: " + targetUrl);
+			pendingImage = null;
+		};
+
+		preload.src = targetUrl;
+	}
+
+	$(document)
+		.off(":passagedisplay.persistentIllustration")
+		.on(":passagedisplay.persistentIllustration", updateIllustration);
+})();
 
 :: Opening [art-01]
-<<sceneImage>>
 <p class="narration">Rain tapped the window. The boy had a blanket, a glass of water and an impressive collection of toys arranged to make illness look productive.</p>
 <p class="narration">His grandfather entered carrying a thick book.</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “Is that homework?”</p>
@@ -271,32 +338,27 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: OpeningSword [art-01]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “We must first meet the people holding the swords.”</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “Fine. But introduce them quickly.”</p>
 <p class="continue"><<link "Continue reading." "OpeningRejoin">><</link>></p>
 
 :: OpeningNoKissing [art-01]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “I can offer a reasonable amount of sword fighting in exchange.”</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “That wasn't a yes.”</p>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “You're learning to negotiate.”</p>
 <p class="continue"><<link "Continue reading." "OpeningRejoin">><</link>></p>
 
 :: OpeningChoice [art-01]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “You may choose what people say and do. I reserve the right to keep the story from becoming nonsense.”</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “That sounds unfair.”</p>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “Most authors would agree.”</p>
 <p class="continue"><<link "Continue reading." "OpeningRejoin">><</link>></p>
 
 :: OpeningRejoin [art-01]
-<<sceneImage>>
 <p class="narration">The grandfather opened the book. On the first page was a farm, which the boy regarded with immediate suspicion.</p>
 <p class="continue"><<link "Turn to the first page." "FarmOpening">><</link>></p>
 
 :: FarmOpening [art-02]
-<<sceneImage>>
 <p class="narration">The farm had a leaky roof, a temperamental horse and a gate that refused to close. Buttercup believed these problems could all be solved by Westley.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “The gate is broken again.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “A tragedy. Shall I inform the king?”</p>
@@ -313,14 +375,12 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: FarmLike [art-02]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Westley:</span> “Even when I'm not repairing something?”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Let's not get carried away.”</p>
 <p class="narration">He smiles; she doesn't look away.</p>
 <p class="continue"><<link "Continue." "FarmRejoin">><</link>></p>
 
 :: FarmGate [art-02]
-<<sceneImage>>
 <p class="narration">Westley checks it with exaggerated care.</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Remarkable. It was straight until you came outside.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Are you blaming me?”</p>
@@ -328,19 +388,16 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue." "FarmRejoin">><</link>></p>
 
 :: FarmDisagree [art-02]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Westley:</span> “I disagree.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “You are impossible.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “We finally agree.”</p>
 <p class="continue"><<link "Continue." "FarmRejoin">><</link>></p>
 
 :: FarmRejoin [art-02]
-<<sceneImage>>
 <p class="narration">Westley shut the repaired gate. Buttercup reached for the latch at the same time as he did. Neither moved their hand immediately.</p>
 <p class="continue"><<link "Continue down the road." "HorizonOpening">><</link>></p>
 
 :: HorizonOpening [art-03]
-<<sceneImage>>
 <p class="narration">Westley had decided to leave and earn enough money to return with a future worth offering. He had rehearsed a dignified farewell. The rehearsal had not included Buttercup looking at him like that.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “How long?”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “I don't know.”</p>
@@ -354,33 +411,28 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: HorizonPromise [art-03]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Westley:</span> “I'll write whenever I can.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Then I'll complain about your handwriting whenever you do.”</p>
 <p class="narration">She squeezes his hand.</p>
 <p class="continue"><<link "Continue." "HorizonRejoin">><</link>></p>
 
 :: HorizonJoke [art-03]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Westley:</span> “Please don't let the horse manage the farm. He has expensive tastes.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “He'll miss you.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “I was hoping someone would.”</p>
 <p class="continue"><<link "Continue." "HorizonRejoin">><</link>></p>
 
 :: HorizonDeclaration [art-03]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Westley:</span> “Nothing in the world will keep me away forever.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “You haven't seen much of the world.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Then it had better be on its best behaviour.”</p>
 <p class="continue"><<link "Continue." "HorizonRejoin">><</link>></p>
 
 :: HorizonRejoin [art-03]
-<<sceneImage>>
 <p class="narration">He walked down the road. Buttercup watched until she could no longer see him. Neither had said the most important thing plainly, but both had heard it.</p>
 <p class="continue"><<link "Continue." "LetterOpening">><</link>></p>
 
 :: LetterOpening [art-04]
-<<sceneImage>>
 <p class="narration">A messenger arrived with news of a ship attacked by pirates. Westley had been aboard. No survivors were known.</p>
 <p class="dialogue"><span class="speaker">Messenger:</span> “I'm sorry. I wish I had better news.”</p>
 <p class="narration">Buttercup looked at the road beyond him.</p>
@@ -395,27 +447,22 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: LetterDetails [art-04]
-<<sceneImage>>
 <p class="narration">The messenger tells her what little he knows. She listens carefully, as if careful listening could bring him home.</p>
 <p class="continue"><<link "Continue." "LetterRejoin">><</link>></p>
 
 :: LetterDoor [art-04]
-<<sceneImage>>
 <p class="narration">She shuts out the messenger, but not his words. After a long while she opens the door again. He has gone.</p>
 <p class="continue"><<link "Continue." "LetterRejoin">><</link>></p>
 
 :: LetterWork [art-04]
-<<sceneImage>>
 <p class="narration">She carries a bucket to the gate, sets it down, and cannot remember why she picked it up.</p>
 <p class="continue"><<link "Continue." "LetterRejoin">><</link>></p>
 
 :: LetterRejoin [art-04]
-<<sceneImage>>
 <p class="narration">Westley's gate still closed perfectly. Buttercup hated it for that, then hated herself for hating it. Seasons passed.</p>
 <p class="continue"><<link "Continue to the palace." "ProposalOpening">><</link>></p>
 
 :: ProposalOpening
-<<sceneImage>>
 <p class="narration">Prince Humperdinck had a talent for turning a conversation into an announcement.</p>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “Our marriage will delight the kingdom.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Has the kingdom been consulted?”</p>
@@ -434,13 +481,11 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: ProposalLove
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “People adore the royal family without knowing us personally.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “That explains a great deal.”</p>
 <p class="continue"><<link "Continue." "ProposalRejoin">><</link>></p>
 
 :: ProposalExpectations
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “Attend ceremonies. Smile. Avoid surprises.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “I can promise to attend.”</p>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “Splendid.”</p>
@@ -448,19 +493,16 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue." "ProposalRejoin">><</link>></p>
 
 :: ProposalTime
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “Take the afternoon.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Generous.”</p>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “I'm known for it.”</p>
 <p class="continue"><<link "Continue." "ProposalRejoin">><</link>></p>
 
 :: ProposalRejoin
-<<sceneImage>>
 <p class="narration">Buttercup accepted a future she did not want, convinced that the one she did want had disappeared at sea. The palace began ordering flowers by the cartload.</p>
 <p class="continue"><<link "Continue." "KidnappingOpening">><</link>></p>
 
 :: KidnappingOpening [art-05]
-<<sceneImage>>
 <p class="narration">The kidnapping was efficient only if you ignored the shouting. A small man issued commands, a giant lifted Buttercup with surprising gentleness, and a swordsman apologised twice before they reached the boat.</p>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “A flawless operation!”</p>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “We're kidnappers!”</p>
@@ -473,27 +515,23 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: KidnapFezzik [art-05]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “Not when I'm asleep.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Fair enough.”</p>
 <p class="narration">He offers the blanket anyway.</p>
 <p class="continue"><<link "Continue." "KidnappingRejoin">><</link>></p>
 
 :: KidnapInigo [art-05]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “I have performed better work. Some of it involved less shouting.”</p>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “I HEARD THAT!”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “That is what I mean.”</p>
 <p class="continue"><<link "Continue." "KidnappingRejoin">><</link>></p>
 
 :: KidnapVizzini [art-05]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “Then I shall demonstrate why failure was the cleverest possible outcome.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “How convenient.”</p>
 <p class="continue"><<link "Continue." "KidnappingRejoin">><</link>></p>
 
 :: KidnappingRejoin [art-05]
-<<sceneImage>>
 <p class="narration">A black sail appeared behind them.</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “Someone is following us.”</p>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “Impossible. I planned not to be followed.”</p>
@@ -502,7 +540,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue to the cliffs." "CliffsOpening">><</link>></p>
 
 :: CliffsOpening [art-06]
-<<sceneImage>>
 <p class="narration">The stranger in black climbed the last stretch of rock. Iñigo waited at the top with his sword sheathed.</p>
 <p class="dialogue"><span class="speaker">Stranger:</span> “Are you going to attack me?”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “Eventually. It seems rude to interrupt a man who has just climbed a cliff.”</p>
@@ -517,27 +554,23 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: CliffsTeacher [art-06]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Stranger:</span> “Several men. Some were better teachers after I stopped listening.”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “A familiar educational method.”</p>
 <p class="continue"><<link "Draw your swords." "DuelOpening">><</link>></p>
 
 :: CliffsSurrender [art-06]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Stranger:</span> “Would you?”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “No.”</p>
 <p class="dialogue"><span class="speaker">Stranger:</span> “Then we have saved ourselves two speeches.”</p>
 <p class="continue"><<link "Draw your swords." "DuelOpening">><</link>></p>
 
 :: CliffsTraining [art-06]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Stranger:</span> “Excellent. I had hoped not to spend the afternoon instructing a beginner.”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “I am beginning to dislike you.”</p>
 <p class="dialogue"><span class="speaker">Stranger:</span> “That usually happens after the duel.”</p>
 <p class="continue"><<link "Draw your swords." "DuelOpening">><</link>></p>
 
 :: DuelOpening [art-07]
-<<sceneImage>>
 <p class="narration">They drew their swords. Steel rang against steel. Iñigo stepped forward; the stranger gave ground, then stole it back. Their blades moved faster than their conversation, which annoyed them both.</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “You are very good.”</p>
 <p class="dialogue"><span class="speaker">Stranger:</span> “Thank you. You are making it difficult to be smug.”</p>
@@ -551,7 +584,6 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: DuelFlourish [art-07]
-<<sceneImage>>
 <p class="narration">The stranger watches the elaborate movement.</p>
 <p class="dialogue"><span class="speaker">Stranger:</span> “Beautiful. Does it come with music?”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “Only if you survive the next part.”</p>
@@ -559,12 +591,10 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue the duel." "DuelOutcome">><</link>></p>
 
 :: DuelSilence [art-07]
-<<sceneImage>>
 <p class="narration">After several tense exchanges, the stranger says, “Are we sulking now? I wasn't informed.” Iñigo almost laughs, which costs him a step.</p>
 <p class="continue"><<link "Continue the duel." "DuelOutcome">><</link>></p>
 
 :: DuelCritique [art-07]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “Your left foot is too far back.”</p>
 <p class="narration">The stranger adjusts and immediately gains ground.</p>
 <p class="dialogue"><span class="speaker">Stranger:</span> “Much better. I appreciate the lesson.”</p>
@@ -572,7 +602,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue the duel." "DuelOutcome">><</link>></p>
 
 :: DuelOutcome [art-07]
-<<sceneImage>>
 <p class="narration">The stranger's blade found Iñigo's guard and knocked the sword from his hand. Iñigo stood unarmed at the cliff edge.</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “You could finish this.”</p>
 <p class="dialogue"><span class="speaker">Stranger:</span> “I could. But then who would tell people how impressive I was?”</p>
@@ -587,7 +616,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue." "GiantOpening">><</link>></p>
 
 :: GiantOpening [art-06]
-<<sceneImage>>
 <p class="narration">Fezzik stood across the path, broad enough to block it without trying.</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “I have to stop you.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “You sound disappointed.”</p>
@@ -601,34 +629,29 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: GiantCompromise [art-06]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “Vizzini says compromises are for people who lose.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Does he say that often?”</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “Usually when he's losing.”</p>
 <p class="continue"><<link "Continue." "GiantFight">><</link>></p>
 
 :: GiantSize [art-06]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “Sometimes I bump my head.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “An unexpected weakness. I'll make a note.”</p>
 <p class="continue"><<link "Continue." "GiantFight">><</link>></p>
 
 :: GiantSurrender [art-06]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “Oh. That's a relief.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “I meant I surrender the opportunity to be crushed. I'm still going through.”</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “That's a very confusing surrender.”</p>
 <p class="continue"><<link "Continue." "GiantFight">><</link>></p>
 
 :: GiantFight [art-06]
-<<sceneImage>>
 <p class="narration">They grappled. Fezzik was stronger, Westley faster. At last the giant fell unconscious, more gently than a man of his size ought to have been able to fall.</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “I hope he wakes with a good opinion of me.”</p>
 <p class="narration">Ahead, Vizzini waited with Buttercup, a small table and two cups.</p>
 <p class="continue"><<link "Face the genius." "WitsOpening">><</link>></p>
 
 :: WitsOpening [art-08]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “At last! A contest worthy of my intellect.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “I was expecting a rescue. I seem to have arrived at a lecture.”</p>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “One of these cups is dangerous. You must reason your way to the safe one.”</p>
@@ -646,13 +669,11 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: WitsChildhood [art-08]
-<<sceneImage>>
 <p class="narration">Vizzini begins with his childhood, moves on to the history of cups, and arrives at a lengthy complaint about teachers.</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “We've established you're upset with education. Can we return to the drinks?”</p>
 <p class="continue"><<link "Continue." "WitsSecondChoice">><</link>></p>
 
 :: WitsSwitch [art-08]
-<<sceneImage>>
 <p class="narration">Vizzini snatches both cups away.</p>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “You cannot outwit me with a trick I have already anticipated!”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Then why did you move them?”</p>
@@ -660,13 +681,11 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue." "WitsSecondChoice">><</link>></p>
 
 :: WitsRules [art-08]
-<<sceneImage>>
 <p class="narration">Vizzini demands paper. There is none. He attempts to write rules on the table with a twig.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “You appear to be losing to stationery.”</p>
 <p class="continue"><<link "Continue." "WitsSecondChoice">><</link>></p>
 
 :: WitsSecondChoice [art-08]
-<<sceneImage>>
 <p class="narration">Vizzini put the cups down with exaggerated care.</p>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “Now choose.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “You first.”</p>
@@ -681,25 +700,21 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: WitsReverse [art-08]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “A simple reverse-psychology trap. Unless you know that I know, in which case—”</p>
 <p class="narration">He stops, offended by his own sentence.</p>
 <p class="continue"><<link "See how the contest ends." "WitsRejoin">><</link>></p>
 
 :: WitsRefuse [art-08]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “I refuse to be told what I refuse!”</p>
 <p class="narration">He takes a cup merely to prove his independence.</p>
 <p class="continue"><<link "See how the contest ends." "WitsRejoin">><</link>></p>
 
 :: WitsJudge [art-08]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “My judgement is that neither of you should be trusted with refreshments.”</p>
 <p class="dialogue"><span class="speaker">Vizzini:</span> “A biased tribunal!”</p>
 <p class="continue"><<link "See how the contest ends." "WitsRejoin">><</link>></p>
 
 :: WitsRejoin [art-08]
-<<sceneImage>>
 <p class="narration">Vizzini made his decision with a triumphant smile. Moments later, the smile deserted him. His cleverness had not protected him from the trap.</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “Was that really a battle of wits?”</p>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “It was certainly a battle. Only one participant brought any wits.”</p>
@@ -709,7 +724,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue across the hills." "FaceMaskOpening">><</link>></p>
 
 :: FaceMaskOpening [art-09]
-<<sceneImage>>
 <p class="narration">The masked stranger led Buttercup away from the clearing. He spoke carelessly of Westley, as though a man lost at sea could be dismissed with a shrug.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “You know nothing about him.”</p>
 <p class="dialogue"><span class="speaker">Stranger:</span> “Perhaps less than you think.”</p>
@@ -725,32 +739,27 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: FaceMaskDead [art-09]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Westley:</span> “I know.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “That was a dreadful thing to let me believe.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Yes. I'm sorry.”</p>
 <p class="continue"><<link "Continue." "FaceMaskRejoin">><</link>></p>
 
 :: FaceMaskArgue [art-09]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Westley:</span> “You were winning.”</p>
 <p class="narration">She tried to stay angry, then reached for him.</p>
 <p class="continue"><<link "Continue." "FaceMaskRejoin">><</link>></p>
 
 :: FaceMaskImagine [art-09]
-<<sceneImage>>
 <p class="narration">He took her hand.</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “You're not.”</p>
 <p class="narration">For once, he had nothing clever to add.</p>
 <p class="continue"><<link "Continue." "FaceMaskRejoin">><</link>></p>
 
 :: FaceMaskRejoin [art-09]
-<<sceneImage>>
 <p class="narration">They held each other. The reunion was real. So were the distant riders gathering on the hills behind them.</p>
 <p class="continue"><<link "Enter the Fire Swamp." "SwampOpening">><</link>></p>
 
 :: SwampOpening [art-10]
-<<sceneImage>>
 <p class="narration">The swamp had a poor reputation, which Westley began to think was generous. The ground steamed. Something large moved under the reeds.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Is there a safer route?”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Almost certainly.”</p>
@@ -767,14 +776,12 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: SwampStones [art-10]
-<<sceneImage>>
 <p class="narration">They pick their way slowly between vents.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “You could have suggested this earlier.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “I was gathering evidence against the other routes.”</p>
 <p class="continue"><<link "Continue through the swamp." "SwampCapture">><</link>></p>
 
 :: SwampReeds [art-11]
-<<sceneImage>>
 <p class="narration">Something huge splashes towards them. They retreat at speed.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Evidence gathered?”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Convincingly.”</p>
@@ -785,14 +792,12 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Try another route." "SwampOpening">><</link>></p>
 
 :: SwampScout [art-10]
-<<sceneImage>>
 <p class="narration">Westley spots a narrow passage.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “And the riders?”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Also spotted. They are inconsiderately persistent.”</p>
 <p class="continue"><<link "Continue through the swamp." "SwampCapture">><</link>></p>
 
 :: SwampCapture [art-12]
-<<sceneImage>>
 <p class="narration">They emerged scratched and exhausted, directly in front of Humperdinck and his armed men.</p>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “You have led me on an unpleasant chase.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “We were hoping you'd stop.”</p>
@@ -800,7 +805,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue to the castle outskirts." "MachineOpening">><</link>></p>
 
 :: MachineOpening [art-13]
-<<sceneImage>>
 <p class="narration">Within the castle, Count Rugen oversaw a machine built to cause suffering. Westley was its prisoner. By the time Fezzik found news of him, the man in black was barely alive.</p>
 <p class="narration">Iñigo had searched for Rugen for years. The knowledge that the count was close made his hands shake, but it did not make his next decision easier.</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “We need to help our friend.”</p>
@@ -815,7 +819,6 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: MachineStorm [art-13]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “I could throw you over the wall.”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “And then?”</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “I haven't planned the landing.”</p>
@@ -823,7 +826,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Try another plan." "MachineOpening">><</link>></p>
 
 :: MachineHealer [art-13]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “I know a healer who argues with patients about whether they're alive.”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “A professional optimist?”</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “More of a professional arguer.”</p>
@@ -831,14 +833,12 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Visit Miracle Max." "MaxConsultation">><</link>></p>
 
 :: MachineDisguise [art-13]
-<<sceneImage>>
 <p class="narration">Fezzik holds a guard's jacket against his chest. It covers one shoulder.</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “Maybe if I don't breathe.”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “I'd prefer you did.”</p>
 <p class="continue"><<link "Try another plan." "MachineOpening">><</link>></p>
 
 :: MaxConsultation [art-14]
-<<sceneImage>>
 <p class="narration">Miracle Max opened the door, saw Westley, and tried to close it again.</p>
 <p class="dialogue"><span class="speaker">Max:</span> “Retired.”</p>
 <p class="dialogue"><span class="speaker">Valerie (inside):</span> “You said that yesterday.”</p>
@@ -857,14 +857,12 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: MaxCompassion [art-14]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “He's our friend.”</p>
 <p class="dialogue"><span class="speaker">Max:</span> “A terrible argument. Friends are notoriously difficult to invoice.”</p>
 <p class="narration">Valerie brings a blanket.</p>
 <p class="continue"><<link "Continue." "MaxExam">><</link>></p>
 
 :: MaxHumperdinck [art-14]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “The prince did this.”</p>
 <p class="dialogue"><span class="speaker">Max:</span> “That peacock? Why didn't you begin with the diagnosis?”</p>
 <p class="dialogue"><span class="speaker">Valerie:</span> “Because that's not a diagnosis.”</p>
@@ -872,7 +870,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue." "MaxExam">><</link>></p>
 
 :: MaxPockets [art-14]
-<<sceneImage>>
 <p class="narration">He produces a button, a stone and some string. Max inspects the stone.</p>
 <p class="dialogue"><span class="speaker">Max:</span> “Excellent stone. The rest is offensive.”</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “I can take the string back.”</p>
@@ -880,7 +877,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue." "MaxExam">><</link>></p>
 
 :: MaxExam [art-14]
-<<sceneImage>>
 <p class="narration">Max examined Westley, frowned, examined him again, and announced three incompatible conclusions.</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “Can you save him?”</p>
 <p class="dialogue"><span class="speaker">Max:</span> “That depends on whether he intends to cooperate.”</p>
@@ -894,26 +890,22 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: MaxExplanation [art-14]
-<<sceneImage>>
 <p class="narration">Max gives one so long and contradictory that Valerie interrupts to translate: “He's trying.”</p>
 <p class="continue"><<link "Continue." "MaxRejoin">><</link>></p>
 
 :: MaxHand [art-14]
-<<sceneImage>>
 <p class="narration">Fezzik does, carefully.</p>
 <p class="dialogue"><span class="speaker">Max:</span> “Good. If he wakes up frightened, tell him I'm the competent one.”</p>
 <p class="dialogue"><span class="speaker">Valerie:</span> “Don't lie to the patient.”</p>
 <p class="continue"><<link "Continue." "MaxRejoin">><</link>></p>
 
 :: MaxOpinion [art-14]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Max:</span> “Valerie!”</p>
 <p class="dialogue"><span class="speaker">Valerie:</span> “I agree with the giant.”</p>
 <p class="dialogue"><span class="speaker">Max:</span> “I withdraw my request.”</p>
 <p class="continue"><<link "Continue." "MaxRejoin">><</link>></p>
 
 :: MaxRejoin [art-14]
-<<sceneImage>>
 <p class="narration">At last Westley opened his eyes. His body was far less enthusiastic about the development.</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Did it work?”</p>
 <p class="dialogue"><span class="speaker">Max:</span> “You are speaking.”</p>
@@ -927,7 +919,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Plan the rescue." "CastleAssault">><</link>></p>
 
 :: CastleAssault [art-15]
-<<sceneImage>>
 <p class="narration">The castle had high walls, armed guards and a wedding underway. The rescue party consisted of one giant, one swordsman and one man who could barely sit upright.</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “We need an army.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “We have Fezzik.”</p>
@@ -941,28 +932,24 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: CastleSilhouette [art-15]
-<<sceneImage>>
 <p class="narration">Fezzik raises a cloaked figure above the gate while Westley supplies an ominous warning. The guards scatter.</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “I think I frightened them.”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “You frightened me, and I knew it was you.”</p>
 <p class="continue"><<link "Enter the castle." "CastleGateOpen">><</link>></p>
 
 :: CastleDuel [art-15]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Captain:</span> “Archers!”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “I was hoping for a more intimate contest.”</p>
 <p class="narration">Arrows strike the ground nearby.</p>
 <p class="continue"><<link "Try another approach." "CastleAssault">><</link>></p>
 
 :: CastleArmies [art-15]
-<<sceneImage>>
 <p class="narration">Fezzik shouts both sides of an imaginary argument.</p>
 <p class="dialogue"><span class="speaker">Guard:</span> “Why do they all sound like one man?”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “An excellent question. Retreat.”</p>
 <p class="continue"><<link "Try another approach." "CastleAssault">><</link>></p>
 
 :: CastleGateOpen [art-15]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Grandson:</span> “They're attacking a castle with three people?”</p>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “Technically two and a half. One can barely stand.”</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “That's a terrible plan.”</p>
@@ -971,7 +958,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Continue through the castle." "RugenOpening">><</link>></p>
 
 :: RugenOpening [art-16]
-<<sceneImage>>
 <p class="narration">Iñigo found Count Rugen in a corridor lined with tapestries. The count recognised him too late to pretend otherwise.</p>
 <p class="dialogue"><span class="speaker">Rugen:</span> “You are making a serious mistake.”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “I've had years to consider it.”</p>
@@ -985,23 +971,19 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: RugenBargain [art-16]
-<<sceneImage>>
 <p class="narration">Rugen's smile falters. He reaches for his weapon.</p>
 <p class="continue"><<link "Continue." "RugenRejoin">><</link>></p>
 
 :: RugenSilence [art-16]
-<<sceneImage>>
 <p class="narration">Rugen takes a breath to object. Iñigo draws his sword.</p>
 <p class="continue"><<link "Continue." "RugenRejoin">><</link>></p>
 
 :: RugenFather [art-16]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Rugen:</span> “I remember many men.”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “Then remember this one.”</p>
 <p class="continue"><<link "Continue." "RugenRejoin">><</link>></p>
 
 :: RugenRejoin [art-16]
-<<sceneImage>>
 <p class="narration">Their duel was brutal. Rugen fought to survive; Iñigo fought for the father he had lost. At last Rugen fell.</p>
 <p class="narration">Iñigo stood still. He had imagined this moment for years. It did not return a single lost day.</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “I thought it would feel different.”</p>
@@ -1009,7 +991,6 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Find Buttercup." "PrinceOpening">><</link>></p>
 
 :: PrinceOpening [art-17]
-<<sceneImage>>
 <p class="narration">Humperdinck entered Buttercup's chamber with the satisfied air of a man expecting applause.</p>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “Everything is under control.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “You keep saying that. Is it a royal motto?”</p>
@@ -1027,35 +1008,30 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: PrinceStand [art-17]
-<<sceneImage>>
 <p class="narration">She crosses the room.</p>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “You cannot simply ignore my orders!”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “I've been practising.”</p>
 <p class="continue"><<link "Continue." "PrinceRejoin">><</link>></p>
 
 :: PrinceDemand [art-17]
-<<sceneImage>>
 <p class="narration">Humperdinck launches into a speech about duty and the realm.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Can you give us the version without yourself in it?”</p>
 <p class="narration">He cannot.</p>
 <p class="continue"><<link "Continue." "PrinceRejoin">><</link>></p>
 
 :: PrincePretend [art-17]
-<<sceneImage>>
 <p class="narration">She steps towards the prince and slides his sword beyond his reach.</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “A convincing performance.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “I learned from an expert.”</p>
 <p class="continue"><<link "Continue." "PrinceRejoin">><</link>></p>
 
 :: PrinceRejoin [art-17]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Humperdinck:</span> “You cannot defeat me!”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Then it must be terribly embarrassing that you already look defeated.”</p>
 <p class="narration">Humperdinck looked at Buttercup, the empty doorway and the sword he could no longer reach. He chose not to test his courage.</p>
 <p class="continue"><<link "Leave the castle." "EscapeOpening">><</link>></p>
 
 :: EscapeOpening [art-18]
-<<sceneImage>>
 <p class="narration">Iñigo and Fezzik arrived in time to find Westley leaning against the wall.</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “Can you walk?”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “In theory.”</p>
@@ -1068,34 +1044,29 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: EscapeHorses [art-18]
-<<sceneImage>>
 <p class="narration">Fezzik smiles.</p>
 <p class="dialogue"><span class="speaker">Fezzik:</span> “I remembered four.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Then you are officially in charge of practical matters.”</p>
 <p class="continue"><<link "Ride out." "EscapeRejoin">><</link>></p>
 
 :: EscapeGuards [art-18]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “Run.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “That's your plan?”</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “It's shorter than our previous ones.”</p>
 <p class="continue"><<link "Ride out." "EscapeRejoin">><</link>></p>
 
 :: EscapePrince [art-18]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Westley:</span> “I was going to suggest a farewell speech.”</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Don't.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “A wise correction.”</p>
 <p class="continue"><<link "Ride out." "EscapeRejoin">><</link>></p>
 
 :: EscapeRejoin [art-18]
-<<sceneImage>>
 <p class="narration">They rode into the night, four friends escaping a castle that had never expected anyone to argue with its prince and win.</p>
 <p class="narration">Back in the bedroom, the grandson leaned forward.</p>
 <p class="continue"><<link "Turn to the last page." "LastPageOpening">><</link>></p>
 
 :: LastPageOpening [art-01]
-<<sceneImage>>
 <p class="narration">The grandfather closed the book. Outside, the rain had stopped.</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “So the giant was kind, the swordsman was brave, and the prince was an idiot.”</p>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “A concise and largely accurate summary.”</p>
@@ -1111,27 +1082,23 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: LastPageAgain [art-01]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “Of course.”</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “Tomorrow. I need to recover from the romance.”</p>
 <p class="continue"><<link "Close the book." "LastPageEnding">><</link>></p>
 
 :: LastPageSwords [art-01]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “I'll consult the swordsmen.”</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “And fewer speeches from the prince.”</p>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “A request shared by the entire kingdom.”</p>
 <p class="continue"><<link "Close the book." "LastPageEnding">><</link>></p>
 
 :: LastPageInigo [art-01]
-<<sceneImage>>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “He had to discover who he was without a revenge to pursue.”</p>
 <p class="dialogue"><span class="speaker">Grandson:</span> “Does that story have swords?”</p>
 <p class="dialogue"><span class="speaker">Grandfather:</span> “Almost certainly.”</p>
 <p class="continue"><<link "Close the book." "LastPageEnding">><</link>></p>
 
 :: LastPageEnding [art-18]
-<<sceneImage>>
 <p class="narration">The grandfather placed the book on the bedside table. The boy glanced at it once more before turning out the light.</p>
 <p class="narration">On the final page, four riders disappeared into the sunlight.</p>
 <p class="narration"><strong>THE END</strong></p>
