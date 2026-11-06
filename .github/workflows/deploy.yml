@@ -1,0 +1,80 @@
+name: Build and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      pages: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies and Tweego
+        run: npm ci
+
+      - name: Build story
+        run: npm run build
+
+      - name: Verify build output and assets
+        shell: pwsh
+        run: |
+          $index = "dist/index.html"
+          $sourceImages = @(Get-ChildItem "assets/images" -File)
+          $outputImages = @(Get-ChildItem "dist/assets/images" -File -ErrorAction SilentlyContinue)
+          $audio = "dist/assets/audio/A tale of true love.mp3"
+
+          if (!(Test-Path $index -PathType Leaf)) {
+            throw "Build output is missing: $index"
+          }
+          if ($sourceImages.Count -eq 0 -or $outputImages.Count -ne $sourceImages.Count) {
+            throw "Expected $($sourceImages.Count) illustration(s) in dist/assets/images; found $($outputImages.Count)."
+          }
+          foreach ($image in $sourceImages) {
+            if (!(Test-Path (Join-Path "dist/assets/images" $image.Name) -PathType Leaf)) {
+              throw "Build output is missing illustration: $($image.Name)"
+            }
+          }
+          if (!(Test-Path $audio -PathType Leaf)) {
+            throw "Build output is missing the background music: $audio"
+          }
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -2,7 +2,7 @@
 
 An illustrated, static interactive novella made with Twee and SugarCube 2. Version 1 implements the complete story in [`narrative/narrative-design.md`](narrative/narrative-design.md), including its bedroom framing story, branching choices, and ending.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-8d7135?style=for-the-badge)](https://oliverius.github.io/princess-bride/)
+[![Live | The Greatest Story Ever Told](https://img.shields.io/badge/Live-%7C%20The%20Greatest%20Story%20Ever%20Told-8d7135?style=for-the-badge)](https://oliverius.github.io/princess-bride/)
 
 ## Setup (Windows 11 x64)
 
@@ -39,7 +39,15 @@ In VS Code, run **Terminal: Run Build Task** to build, or open **Tasks: Run Task
 
 ## GitHub Pages
 
-Pushing to `main` builds the story on Windows and deploys `dist/` to GitHub Pages. The repository's Pages source must be set to **GitHub Actions**. The live demo is published at [oliverius.github.io/princess-bride](https://oliverius.github.io/princess-bride/).
+Pushing to `main` builds the story on Windows and deploys `dist/` to GitHub Pages. The workflow runs `npm ci` (which provisions the pinned Tweego 2.1.1 and SugarCube 2.37.3 toolchain), builds with `npm run build`, checks that the HTML, illustrations, and background music are present, and deploys the build with the official GitHub Pages Actions. `dist/` stays excluded from Git; only the generated Pages artifact is uploaded.
+
+To enable deployment:
+
+1. In the repository on GitHub, open **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**.
+2. Push a commit to `main`, or open **Actions → Build and deploy to GitHub Pages → Run workflow** to deploy manually.
+3. Check the workflow run under **Actions**. After it succeeds, find the published URL in the `github-pages` environment under **Settings → Environments**, in the deployment job summary, or on **Settings → Pages**. For this repository, the expected URL is [oliverius.github.io/princess-bride](https://oliverius.github.io/princess-bride/).
+
+If a deployment fails, open the failed run in **Actions** and expand the first failing step. Check that the Pages source is **GitHub Actions**, that the workflow has its `pages: write` and `id-token: write` permissions, and that `npm ci` can download the Tweego and SugarCube archives. A build or asset-verification failure means `dist/index.html`, one or more copied illustrations, or `dist/assets/audio/A tale of true love.mp3` is missing; rerun `npm run build` locally to diagnose it. The relative image and audio URLs in the story work under the repository URL subpath as well as a domain root.
 
 The `StoryInterface` keeps the illustration outside the passage-replaced DOM. Passages with the same art tag retain the same image element and resolved image URL during navigation.
 
