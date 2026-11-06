@@ -1,0 +1,10 @@
+{
+  "name": "princess-bride-interactive-novella",
+  "private": true,
+  "scripts": {
+    "postinstall": "node scripts/setup-tweego.mjs",
+    "setup:tweego": "node scripts/setup-tweego.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/preview.mjs"
+  }
+}

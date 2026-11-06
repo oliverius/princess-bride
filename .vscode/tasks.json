@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build game",
+      "type": "npm",
+      "script": "build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Preview game",
+      "type": "npm",
+      "script": "preview",
+      "dependsOn": "Build game",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^> node scripts/preview\\.mjs$",
+          "endsPattern": "^Previewing the game at http://127\\.0\\.0\\.1:8080$"
+        }
+      }
+    }
+  ]
+}
