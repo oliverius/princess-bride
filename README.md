@@ -2,7 +2,7 @@
 
 An illustrated, static interactive novella made with Twee and SugarCube 2. Version 1 implements the complete story in [`narrative/narrative-design.md`](narrative/narrative-design.md), including its bedroom framing story, branching choices, and ending.
 
-[![Live | The Greatest Story Ever Told](https://img.shields.io/badge/Live-%7C%20The%20Greatest%20Story%20Ever%20Told-8d7135?style=for-the-badge)](https://oliverius.github.io/princess-bride/)
+[![Live The Greatest Story Ever Told](https://img.shields.io/badge/Live%20The%20Greatest%20Story%20Ever%20Told-8d7135?style=for-the-badge)](https://oliverius.github.io/princess-bride/)
 
 ## Setup (Windows 11 x64)
 
