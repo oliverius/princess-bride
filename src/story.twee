@@ -98,6 +98,11 @@ html {
 	font-weight: 650;
 }
 
+.framing-dialogue {
+	color: #8d7135;
+	font-style: italic;
+}
+
 .choices {
 	list-style: none;
 	margin: 1.6rem 0 0;
@@ -324,12 +329,12 @@ setup.sceneImages = Object.freeze({
 :: Opening [art-01]
 <p class="narration">Rain tapped the window. The boy had a blanket, a glass of water and an impressive collection of toys arranged to make illness look productive.</p>
 <p class="narration">His grandfather entered carrying a thick book.</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Is that homework?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “Worse. Literature.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “I knew you were up to something.”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “This one has sword fights, pirates, a giant and a prince who is very pleased with himself.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Does the prince get punched?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “You're asking excellent questions remarkably early.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Is that homework?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “Worse. Literature.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “I knew you were up to something.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “This one has sword fights, pirates, a giant and a prince who is very pleased with himself.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Does the prince get punched?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “You're asking excellent questions remarkably early.”</p>
 <p>How does the boy negotiate the reading?</p>
 <ul class="choices">
 	<li><<link "“Start with the sword fights.”" "OpeningSword">><</link>></li>
@@ -338,20 +343,20 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: OpeningSword [art-01]
-<p class="dialogue"><span class="speaker">Grandfather:</span> “We must first meet the people holding the swords.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Fine. But introduce them quickly.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “We must first meet the people holding the swords.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Fine. But introduce them quickly.”</p>
 <p class="continue"><<link "Continue reading." "OpeningRejoin">><</link>></p>
 
 :: OpeningNoKissing [art-01]
-<p class="dialogue"><span class="speaker">Grandfather:</span> “I can offer a reasonable amount of sword fighting in exchange.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “That wasn't a yes.”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “You're learning to negotiate.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “I can offer a reasonable amount of sword fighting in exchange.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “That wasn't a yes.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “You're learning to negotiate.”</p>
 <p class="continue"><<link "Continue reading." "OpeningRejoin">><</link>></p>
 
 :: OpeningChoice [art-01]
-<p class="dialogue"><span class="speaker">Grandfather:</span> “You may choose what people say and do. I reserve the right to keep the story from becoming nonsense.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “That sounds unfair.”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “Most authors would agree.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “You may choose what people say and do. I reserve the right to keep the story from becoming nonsense.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “That sounds unfair.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “Most authors would agree.”</p>
 <p class="continue"><<link "Continue reading." "OpeningRejoin">><</link>></p>
 
 :: OpeningRejoin [art-01]
@@ -608,10 +613,10 @@ setup.sceneImages = Object.freeze({
 <p class="narration">He stepped away, leaving Iñigo alive.</p>
 <p class="dialogue"><span class="speaker">Iñigo:</span> “I would have described you as insufferable.”</p>
 <p class="dialogue"><span class="speaker">Stranger:</span> “I'll settle for accurate.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Wait, he lets him live? After all that fighting?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “Some men can win a duel without insisting on winning an argument with a corpse.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “That was a strange sentence.”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “It's a strange story.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Wait, he lets him live? After all that fighting?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “Some men can win a duel without insisting on winning an argument with a corpse.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “That was a strange sentence.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “It's a strange story.”</p>
 <p class="narration">The stranger hurried after the kidnappers. Iñigo recovered his sword, his pride, and a useful new respect for men in black.</p>
 <p class="continue"><<link "Continue." "GiantOpening">><</link>></p>
 
@@ -716,10 +721,10 @@ setup.sceneImages = Object.freeze({
 
 :: WitsRejoin [art-08]
 <p class="narration">Vizzini made his decision with a triumphant smile. Moments later, the smile deserted him. His cleverness had not protected him from the trap.</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Was that really a battle of wits?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “It was certainly a battle. Only one participant brought any wits.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Buttercup?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “An excellent answer.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Was that really a battle of wits?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “It was certainly a battle. Only one participant brought any wits.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Buttercup?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “An excellent answer.”</p>
 <p class="narration">Buttercup was free, though she had no reason yet to trust the masked man who had rescued her.</p>
 <p class="continue"><<link "Continue across the hills." "FaceMaskOpening">><</link>></p>
 
@@ -785,10 +790,10 @@ setup.sceneImages = Object.freeze({
 <p class="narration">Something huge splashes towards them. They retreat at speed.</p>
 <p class="dialogue"><span class="speaker">Buttercup:</span> “Evidence gathered?”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Convincingly.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Why would anyone go into the reeds after hearing a monster?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “Some people insist on testing a warning personally.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “That's what the sign was for!”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “An excellent point. Shall I send the author a letter?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Why would anyone go into the reeds after hearing a monster?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “Some people insist on testing a warning personally.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “That's what the sign was for!”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “An excellent point. Shall I send the author a letter?”</p>
 <p class="continue"><<link "Try another route." "SwampOpening">><</link>></p>
 
 :: SwampScout [art-10]
@@ -911,10 +916,10 @@ setup.sceneImages = Object.freeze({
 <p class="dialogue"><span class="speaker">Max:</span> “You are speaking.”</p>
 <p class="dialogue"><span class="speaker">Westley:</span> “Is that a yes?”</p>
 <p class="dialogue"><span class="speaker">Valerie:</span> “It's the closest you're going to get.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Is Max a real doctor?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “He has an excellent bedside manner, provided the bed is somewhere else.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “So no?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “So let's be grateful Valerie was there.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Is Max a real doctor?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “He has an excellent bedside manner, provided the bed is somewhere else.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “So no?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “So let's be grateful Valerie was there.”</p>
 <p class="narration">Westley could speak and think, but barely move. That was enough for his friends to begin planning something spectacularly foolish.</p>
 <p class="continue"><<link "Plan the rescue." "CastleAssault">><</link>></p>
 
@@ -950,10 +955,10 @@ setup.sceneImages = Object.freeze({
 <p class="continue"><<link "Try another approach." "CastleAssault">><</link>></p>
 
 :: CastleGateOpen [art-15]
-<p class="dialogue"><span class="speaker">Grandson:</span> “They're attacking a castle with three people?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “Technically two and a half. One can barely stand.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “That's a terrible plan.”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “Yes. Fortunately, it's also a very loud one.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “They're attacking a castle with three people?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “Technically two and a half. One can barely stand.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “That's a terrible plan.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “Yes. Fortunately, it's also a very loud one.”</p>
 <p class="narration">The guards fled the gate. Iñigo and Fezzik carried Westley inside before anyone could reconsider.</p>
 <p class="continue"><<link "Continue through the castle." "RugenOpening">><</link>></p>
 
@@ -1068,12 +1073,12 @@ setup.sceneImages = Object.freeze({
 
 :: LastPageOpening [art-01]
 <p class="narration">The grandfather closed the book. Outside, the rain had stopped.</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “So the giant was kind, the swordsman was brave, and the prince was an idiot.”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “A concise and largely accurate summary.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “And the lovers got away.”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “They did.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “There was quite a lot of kissing for a sword-fighting story.”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “There was quite a lot of sword fighting for a kissing story.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “So the giant was kind, the swordsman was brave, and the prince was an idiot.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “A concise and largely accurate summary.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “And the lovers got away.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “They did.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “There was quite a lot of kissing for a sword-fighting story.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “There was quite a lot of sword fighting for a kissing story.”</p>
 <p>What does the boy ask before his grandfather leaves?</p>
 <ul class="choices">
 	<li><<link "“Could you read it again?”" "LastPageAgain">><</link>></li>
@@ -1082,23 +1087,23 @@ setup.sceneImages = Object.freeze({
 </ul>
 
 :: LastPageAgain [art-01]
-<p class="dialogue"><span class="speaker">Grandfather:</span> “Of course.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Tomorrow. I need to recover from the romance.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “Of course.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Tomorrow. I need to recover from the romance.”</p>
 <p class="continue"><<link "Close the book." "LastPageEnding">><</link>></p>
 
 :: LastPageSwords [art-01]
-<p class="dialogue"><span class="speaker">Grandfather:</span> “I'll consult the swordsmen.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “And fewer speeches from the prince.”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “A request shared by the entire kingdom.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “I'll consult the swordsmen.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “And fewer speeches from the prince.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “A request shared by the entire kingdom.”</p>
 <p class="continue"><<link "Close the book." "LastPageEnding">><</link>></p>
 
 :: LastPageInigo [art-01]
-<p class="dialogue"><span class="speaker">Grandfather:</span> “He had to discover who he was without a revenge to pursue.”</p>
-<p class="dialogue"><span class="speaker">Grandson:</span> “Does that story have swords?”</p>
-<p class="dialogue"><span class="speaker">Grandfather:</span> “Almost certainly.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “He had to discover who he was without a revenge to pursue.”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandson:</span> “Does that story have swords?”</p>
+<p class="dialogue framing-dialogue"><span class="speaker">Grandfather:</span> “Almost certainly.”</p>
 <p class="continue"><<link "Close the book." "LastPageEnding">><</link>></p>
 
 :: LastPageEnding [art-18]
 <p class="narration">The grandfather placed the book on the bedside table. The boy glanced at it once more before turning out the light.</p>
-<p class="narration">On the final page, four riders disappeared into the sunlight.</p>
+<p class="narration">On the final page, four riders disappeared into the moonlit distance.</p>
 <p class="narration"><strong>THE END</strong></p>

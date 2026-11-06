@@ -37,6 +37,8 @@ In VS Code, run **Terminal: Run Build Task** to build, or open **Tasks: Run Task
 
 The `StoryInterface` keeps the illustration outside the passage-replaced DOM. Passages with the same art tag retain the same image element and resolved image URL during navigation.
 
+For framing dialogue, add `framing-dialogue` to the dialogue paragraph (for example, `<p class="dialogue framing-dialogue">`) to apply the dusty-blue italic treatment. Keep narration outside that class so only spoken words are styled.
+
 ## Current scope
 
 The complete v1 story follows all 15 manuscript beats from the bedside opening through the final page. Choices have their written responses and rejoin or retry as specified; there are no inventory systems or alternate endings.
