@@ -23,7 +23,7 @@ npm run preview
 
 Open the printed local URL (by default, `http://127.0.0.1:8080`). Stop the preview server with `Ctrl+C`. To choose another port, set `$env:PORT` before running `npm run preview`.
 
-The build compiles `src/story.twee` into `dist/index.html` and copies the approved illustrations to `dist/assets/images/`. The project has no third-party npm dependencies.
+The build compiles `src/story.twee` into `dist/index.html` and copies the approved illustrations and background music to `dist/assets/images/` and `dist/assets/audio/`. The project has no third-party npm dependencies.
 
 In VS Code, run **Terminal: Run Build Task** to build, or open **Tasks: Run Task** and select **Preview game** to build and start the local preview together. Stop the preview task from the terminal's stop button or with `Ctrl+C`.
 
@@ -38,6 +38,12 @@ In VS Code, run **Terminal: Run Build Task** to build, or open **Tasks: Run Task
 The `StoryInterface` keeps the illustration outside the passage-replaced DOM. Passages with the same art tag retain the same image element and resolved image URL during navigation.
 
 For framing dialogue, add `framing-dialogue` to the dialogue paragraph (for example, `<p class="dialogue framing-dialogue">`) to apply the dusty-blue italic treatment. Keep narration outside that class so only spoken words are styled.
+
+## Background music
+
+The background track is `assets/audio/A tale of true love.mp3`; the build copies it unchanged to `dist/assets/audio/`. Music starts only when the reader activates **Begin Story**, plays on a loop at 25% volume, and continues through passage navigation. The persistent **Music on / Music off** button pauses and resumes playback without restarting the track.
+
+Use `npm run preview` to play the compiled game. Opening `dist/index.html` directly with `file://` may be blocked by browser media/security policies. Importing the Twee source into Twine does not bundle the external MP3; publish or serve the audio at the matching relative path (`assets/audio/A tale of true love.mp3`) alongside the exported story.
 
 ## Current scope
 

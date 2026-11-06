@@ -5,7 +5,7 @@ The Princess Bride: A Story Worth Interrupting
 {
   "ifid": "EA7755F0-726C-4D14-ABF9-99428AA266B1",
   "format": "SugarCube",
-  "start": "Opening"
+  "start": "Start"
 }
 
 :: StoryStylesheet [stylesheet]
@@ -156,6 +156,48 @@ a:focus-visible {
 	text-underline-offset: 0.2em;
 }
 
+.music-controls {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 0.75rem;
+}
+
+#music-toggle {
+	background: transparent;
+	border: 1px solid #ecd28f;
+	color: #ecd28f;
+	cursor: pointer;
+	font: inherit;
+	font-size: 0.8rem;
+	padding: 0.25rem 0.6rem;
+}
+
+#music-toggle:disabled {
+	cursor: not-allowed;
+	opacity: 0.55;
+}
+
+#music-toggle:focus-visible,
+#begin-story:focus-visible {
+	outline: 2px solid #ecd28f;
+	outline-offset: 4px;
+}
+
+#begin-story {
+	background: transparent;
+	border: 0;
+	color: #ecd28f;
+	cursor: pointer;
+	font: inherit;
+	padding: 0;
+}
+
+#begin-story:hover {
+	color: #fff0bd;
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
 @media (max-width: 420px) {
 	body {
 		font-size: 1rem;
@@ -176,10 +218,17 @@ a:focus-visible {
 }
 
 :: StoryInterface
+<div class="music-controls">
+	<button id="music-toggle" type="button" aria-label="Music off" aria-pressed="false" disabled>Music off</button>
+</div>
 <figure id="persistent-illustration" class="scene-illustration" hidden>
 	<img id="persistent-illustration-image" alt="">
 </figure>
 <div id="passages"></div>
+
+:: StoryInit
+<<cacheaudio "princess-bride-music" "assets/audio/A tale of true love.mp3">>
+<<run SimpleAudio.tracks.get("princess-bride-music").volume(0.25).loop(true)>>
 
 :: StoryScript [script]
 setup.sceneImages = Object.freeze({
@@ -324,7 +373,103 @@ setup.sceneImages = Object.freeze({
 	$(document)
 		.off(":passagedisplay.persistentIllustration")
 		.on(":passagedisplay.persistentIllustration", updateIllustration);
+
+	let musicTrack = null;
+	let musicStarted = false;
+	let musicPending = false;
+
+	function getMusicTrack() {
+		if (!musicTrack) {
+			musicTrack = window.SugarCube.SimpleAudio.tracks.get("princess-bride-music");
+		}
+
+		return musicTrack;
+	}
+
+	function updateMusicButton(isPlaying) {
+		const button = document.getElementById("music-toggle");
+		button.disabled = !musicStarted || musicPending;
+		button.textContent = isPlaying ? "Music on" : "Music off";
+		button.setAttribute("aria-label", isPlaying ? "Music on (click to pause)" : "Music off (click to resume)");
+		button.setAttribute("aria-pressed", String(isPlaying));
+	}
+
+	function playMusic() {
+		if (musicPending) {
+			return;
+		}
+
+		let track;
+		try {
+			track = getMusicTrack();
+		} catch (error) {
+			updateMusicButton(false);
+			console.warn("Background music is unavailable:", error);
+			return;
+		}
+
+		if (track.isPlaying()) {
+			return;
+		}
+
+		musicPending = true;
+		updateMusicButton(false);
+
+		let playback;
+		try {
+			playback = track.play();
+		} catch (error) {
+			musicPending = false;
+			updateMusicButton(false);
+			console.warn("Background music could not be played:", error);
+			return;
+		}
+
+		Promise.resolve(playback)
+			.then(function () {
+				musicPending = false;
+				updateMusicButton(track.isPlaying());
+			})
+			.catch(function (error) {
+				musicPending = false;
+				updateMusicButton(false);
+				console.warn("Background music could not be played:", error);
+			});
+	}
+
+	setup.startStoryMusic = function () {
+		if (musicStarted) {
+			return;
+		}
+
+		musicStarted = true;
+		playMusic();
+	};
+
+	$(document)
+		.off("click.storyMusic")
+		.on("click.storyMusic", "#begin-story", function (event) {
+			event.preventDefault();
+			setup.startStoryMusic();
+			Engine.play("Opening");
+		})
+		.on("click.storyMusic", "#music-toggle", function () {
+			if (!musicStarted || musicPending) {
+				return;
+			}
+
+			const track = getMusicTrack();
+			if (track.isPlaying()) {
+				track.pause();
+				updateMusicButton(false);
+			} else {
+				playMusic();
+			}
+		});
 })();
+
+:: Start [art-01]
+<p class="continue"><button id="begin-story" type="button">Begin Story</button></p>
 
 :: Opening [art-01]
 <p class="narration">Rain tapped the window. The boy had a blanket, a glass of water and an impressive collection of toys arranged to make illness look productive.</p>

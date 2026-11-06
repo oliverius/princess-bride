@@ -13,6 +13,8 @@ const temporaryOutput = path.join(outputDirectory, ".index.html.tmp");
 const outputFile = path.join(outputDirectory, "index.html");
 const imageSource = path.join(projectRoot, "assets", "images");
 const imageOutput = path.join(outputDirectory, "assets", "images");
+const audioSource = path.join(projectRoot, "assets", "audio");
+const audioOutput = path.join(outputDirectory, "assets", "audio");
 
 try {
 	await access(tweego);
@@ -62,6 +64,9 @@ try {
 await rm(imageOutput, { recursive: true, force: true });
 await mkdir(imageOutput, { recursive: true });
 await cp(imageSource, imageOutput, { recursive: true });
+await rm(audioOutput, { recursive: true, force: true });
+await mkdir(audioOutput, { recursive: true });
+await cp(audioSource, audioOutput, { recursive: true });
 await rm(outputFile, { force: true });
 await rename(temporaryOutput, outputFile);
 

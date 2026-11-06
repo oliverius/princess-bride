@@ -685,23 +685,23 @@ On the final page, four riders disappeared into the sunlight.
 
 ## Beat-to-scene index
 
-| Beat | Scene | Title | Candidate subscenes |
-|---|---:|---|---|
-| Opening Image | 01 | The Book on the Bedside Table | — |
-| Theme Stated | 02 | The Farm and the Answer | — |
-| Set-Up | 03 | The Horizon | — |
-| Catalyst | 04 | A Letter Without Hope | — |
-| Debate | 05 | The Prince's Proposal | — |
-| Break into Two | 06 | Three Unlikely Kidnappers | — |
-| B Story | 07 | The Stranger in Black | 07a, 07b |
-| Fun and Games | 08 | A Giant, a Genius, and Two Cups | 08a, 08b, 08c |
-| Midpoint | 09 | The Face Beneath the Mask | — |
-| Bad Guys Close In | 10 | The Fire Swamp | — |
-| All Is Lost | 11 | The Machine | — |
-| Dark Night of the Soul | 12 | A Very Unpromising Miracle | 12a, 12b |
-| Break into Three | 13 | Three Against a Castle | — |
-| Finale | 14 | The Castle and the Choice | 14a, 14b, 14c |
-| Final Image | 15 | The Last Page | — |
+| Beat                   | Scene                           | Title | Candidate subscenes |
+|------------------------|--------------------------------:|---|---|
+| Opening Image          | 01                              | The Book on the Bedside Table | — |
+| Theme Stated           | 02                              | The Farm and the Answer | — |
+| Set-Up | 03            | The Horizon                     | — |
+| Catalyst | 04          | A Letter Without Hope           | — |
+| Debate | 05            | The Prince's Proposal           | — |
+| Break into Two         | 06                              | Three Unlikely Kidnappers | — |
+| B Story | 07           | The Stranger in Black           | 07a, 07b |
+| Fun and Games          | 08                              | A Giant, a Genius, and Two Cups | 08a, 08b, 08c |
+| Midpoint | 09          | The Face Beneath the Mask       | — |
+| Bad Guys Close In      | 10                              | The Fire Swamp             | — |
+| All Is Lost | 11       | The Machine                     | — |
+| Dark Night of the Soul | 12                              | A Very Unpromising Miracle | 12a, 12b |
+| Break into Three       | 13                              | Three Against a Castle     | — |
+| Finale | 14            | The Castle and the Choice       | 14a, 14b, 14c |
+| Final Image            | 15                              | The Last Page | — |
 
 ## Questions for the next editorial pass
 
