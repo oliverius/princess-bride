@@ -188,7 +188,9 @@ a:focus-visible {
 	border: 0;
 	color: #ecd28f;
 	cursor: pointer;
+	display: block;
 	font: inherit;
+	margin: 0 auto;
 	padding: 0;
 }
 

@@ -2,6 +2,8 @@
 
 An illustrated, static interactive novella made with Twee and SugarCube 2. Version 1 implements the complete story in [`narrative/narrative-design.md`](narrative/narrative-design.md), including its bedroom framing story, branching choices, and ending.
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-8d7135?style=for-the-badge)](https://oliverius.github.io/princess-bride/)
+
 ## Setup (Windows 11 x64)
 
 Requirements: Node.js 18 or newer (including npm) and an internet connection for the initial toolchain download.
@@ -34,6 +36,10 @@ In VS Code, run **Terminal: Run Build Task** to build, or open **Tasks: Run Task
 3. If the passage needs an illustration, tag it with the matching `art-##` tag (for example, `:: PassageName [art-03]`), then add the image path and descriptive alt text under that tag in `setup.sceneImages` in the `StoryScript` passage. The persistent illustration above `#passages` resolves the tag automatically; do not add image markup to individual passages. Passages without a matching illustration can omit the art tag.
 4. Put new source images in `assets/images/`; the build copies that folder into `dist/assets/images/`.
 5. Run `npm run build` and review the game with `npm run preview`.
+
+## GitHub Pages
+
+Pushing to `main` builds the story on Windows and deploys `dist/` to GitHub Pages. The repository's Pages source must be set to **GitHub Actions**. The live demo is published at [oliverius.github.io/princess-bride](https://oliverius.github.io/princess-bride/).
 
 The `StoryInterface` keeps the illustration outside the passage-replaced DOM. Passages with the same art tag retain the same image element and resolved image URL during navigation.
 
